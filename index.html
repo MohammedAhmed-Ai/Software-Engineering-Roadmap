@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Software Engineering Learning Platform</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+            arabic: ['Cairo', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons & Canvas Confetti CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body data-theme="github" class="antialiased selection:bg-blue-600 selection:text-white">
+
+  <!-- ================= TOP NAVIGATION BAR ================= -->
+  <header class="sticky top-0 z-40 w-full glass-panel border-b">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+      
+      <!-- Brand & Title -->
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-lg bg-blue-600/10 border border-blue-500/30 flex items-center justify-center text-blue-500">
+          <i data-lucide="terminal" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-[11px] font-mono uppercase text-slate-400 font-semibold">Engineer Path</span>
+            <span class="text-[10px] text-slate-500 font-mono">v2.5</span>
+          </div>
+          <h1 class="text-sm sm:text-base font-bold tracking-tight">
+            Software Engineering Roadmap
+          </h1>
+        </div>
+      </div>
+
+      <!-- Center: Level & XP Bar -->
+      <div class="hidden md:flex items-center gap-4 glass-panel px-3.5 py-1.5 rounded-lg">
+        <div>
+          <div class="flex items-center justify-between text-xs mb-1">
+            <span id="user-rank-badge" class="font-semibold text-blue-400 font-mono">Level 1 — Novice Architect</span>
+            <span id="user-xp-badge" class="font-mono text-slate-400 ml-3">200 XP</span>
+          </div>
+          <div class="w-40 h-1.5 rounded-full bg-slate-800 overflow-hidden">
+            <div id="user-xp-bar" class="h-full bg-blue-500 rounded-full transition-all duration-300" style="width: 25%"></div>
+          </div>
+        </div>
+
+        <div class="h-6 w-px bg-slate-700"></div>
+
+        <!-- Streak Badge -->
+        <div class="flex items-center gap-1.5" title="Consecutive days studying">
+          <i data-lucide="flame" class="w-4 h-4 text-amber-500"></i>
+          <span id="user-streak" class="text-xs font-mono font-bold">1d</span>
+        </div>
+      </div>
+
+      <!-- Right Actions: Theme Selector, Sound, Obsidian Vault Exporter, Backup -->
+      <div class="flex items-center gap-2">
+        
+        <!-- Live Theme Switcher -->
+        <div class="flex items-center gap-1 p-1 rounded-lg glass-panel text-xs">
+          <button onclick="app.setTheme('github')" class="theme-selector-btn px-2 py-1 rounded text-[11px] font-mono transition-colors" data-theme-choice="github" title="GitHub Dark Dimmed">
+            GitHub
+          </button>
+          <button onclick="app.setTheme('warm')" class="theme-selector-btn px-2 py-1 rounded text-[11px] font-mono transition-colors" data-theme-choice="warm" title="Warm Obsidian / Notion Craft">
+            Warm Craft
+          </button>
+          <button onclick="app.setTheme('slate')" class="theme-selector-btn px-2 py-1 rounded text-[11px] font-mono transition-colors" data-theme-choice="slate" title="Minimalist Slate">
+            Slate
+          </button>
+          <button onclick="app.setTheme('light')" class="theme-selector-btn px-2 py-1 rounded text-[11px] font-mono transition-colors" data-theme-choice="light" title="Clean Daylight Paper">
+            Light
+          </button>
+        </div>
+
+        <!-- Export Obsidian Vault Button -->
+        <button onclick="app.exportObsidianVault()" class="p-2 rounded-lg glass-panel hover:border-slate-500 text-xs font-mono flex items-center gap-1.5 transition-colors" title="Export Obsidian Journal (.md)">
+          <i data-lucide="file-down" class="w-3.5 h-3.5 text-purple-400"></i>
+          <span class="hidden lg:inline text-slate-300 text-[11px]">Obsidian .md</span>
+        </button>
+
+        <!-- Sound Toggle -->
+        <button id="sound-toggle-btn" class="p-2 rounded-lg glass-panel hover:border-slate-500 transition-colors" title="Toggle Sound">
+          <i data-lucide="volume-2" class="w-4 h-4 text-emerald-500"></i>
+        </button>
+
+        <!-- Backup Data Dropdown -->
+        <div class="relative group">
+          <button class="p-2 rounded-lg glass-panel hover:border-slate-500 transition-colors flex items-center gap-1 text-xs">
+            <i data-lucide="database" class="w-3.5 h-3.5 text-blue-400"></i>
+            <span class="hidden sm:inline">Data</span>
+          </button>
+          
+          <div class="absolute right-0 mt-2 w-48 rounded-lg glass-panel p-1.5 shadow-xl hidden group-hover:block transition-all z-50">
+            <button onclick="app.exportObsidianVault()" class="w-full text-left px-2.5 py-1.5 rounded text-xs hover:bg-slate-800 flex items-center gap-2 text-purple-400 font-mono">
+              <i data-lucide="file-text" class="w-3.5 h-3.5"></i> Export Obsidian .md
+            </button>
+            <button onclick="app.exportBackup()" class="w-full text-left px-2.5 py-1.5 rounded text-xs hover:bg-slate-800 flex items-center gap-2">
+              <i data-lucide="download" class="w-3.5 h-3.5 text-blue-400"></i> Backup (.json)
+            </button>
+            <label class="w-full text-left px-2.5 py-1.5 rounded text-xs hover:bg-slate-800 flex items-center gap-2 cursor-pointer">
+              <i data-lucide="upload" class="w-3.5 h-3.5 text-emerald-400"></i> Restore Backup
+              <input type="file" accept=".json" class="hidden" onchange="app.importBackup(this.files[0])" />
+            </label>
+            <div class="h-px bg-slate-700 my-1"></div>
+            <button onclick="app.resetAllProgress()" class="w-full text-left px-2.5 py-1.5 rounded text-xs text-rose-400 hover:bg-rose-950/30 flex items-center gap-2">
+              <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Reset Progress
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= HERO & DASHBOARD ================= -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6">
+      
+      <!-- Current Target Mission (Hero Card) -->
+      <div class="lg:col-span-2 glass-panel rounded-xl p-6 flex flex-col justify-between">
+        <div>
+          <div class="flex items-center gap-2 mb-2 flex-wrap">
+            <span id="hero-mission-badge" class="px-2.5 py-0.5 rounded text-[11px] font-mono font-semibold bg-blue-900/30 text-blue-300 border border-blue-500/40">
+              Current Target: Phase 1
+            </span>
+            <span class="text-xs text-slate-400 font-mono">Next Up In Sequence</span>
+          </div>
+
+          <h2 id="hero-mission-title" class="text-xl sm:text-2xl font-bold tracking-tight">
+            1.3 SDLC & Delivery Process
+          </h2>
+          <p id="hero-mission-ar" class="text-sm text-slate-400 font-arabic mt-1">
+            دورات تطوير البرمجيات والمنهجيات الرشيقة
+          </p>
+          <p id="hero-mission-summary" class="text-xs text-slate-400 mt-2 max-w-xl leading-relaxed">
+            مناهج إدارة المشروعات البرمجية وتسليم المنتجات بكفاءة، من Waterfall إلى Agile وScrum.
+          </p>
+        </div>
+
+        <div class="mt-5 pt-4 border-t border-inherit flex flex-wrap items-center justify-between gap-4">
+          <div class="flex items-center gap-2 text-xs text-slate-400 font-mono">
+            <i data-lucide="book-open" class="w-4 h-4 text-blue-400"></i>
+            <span>8-Step Deep Understanding Framework</span>
+          </div>
+
+          <button id="hero-mission-action" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs flex items-center gap-2 transition-colors">
+            <span>Open Study Lab</span>
+            <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Right Column: Overall Progress & Focus Pomodoro -->
+      <div class="flex flex-col gap-4">
+        
+        <!-- Total Roadmap Progress Metric -->
+        <div class="glass-panel rounded-xl p-5 flex items-center justify-between gap-4">
+          <div>
+            <div class="text-[11px] font-mono uppercase text-slate-400 tracking-wider">Roadmap Progress</div>
+            <div class="text-2xl font-bold mt-1 flex items-baseline gap-2">
+              <span id="mastery-percentage">5%</span>
+              <span class="text-xs font-normal text-emerald-400 font-mono">Active</span>
+            </div>
+            <div id="mastery-topic-count" class="text-xs text-slate-400 mt-1 font-mono">
+              2 / 41 Topics Mastered
+            </div>
+            <div class="w-full h-1.5 rounded-full bg-slate-800 overflow-hidden mt-3">
+              <div id="mastery-progress-bar" class="h-full bg-blue-500 rounded-full transition-all duration-300" style="width: 5%"></div>
+            </div>
+          </div>
+
+          <div class="w-12 h-12 rounded-lg bg-blue-900/20 border border-blue-500/30 flex items-center justify-center text-blue-400 flex-shrink-0">
+            <i data-lucide="compass" class="w-6 h-6"></i>
+          </div>
+        </div>
+
+        <!-- Built-in Focus Pomodoro Timer -->
+        <div class="glass-panel rounded-xl p-5">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-1.5">
+              <i data-lucide="timer" class="w-3.5 h-3.5 text-amber-500"></i>
+              <span class="text-xs font-mono uppercase tracking-wider text-slate-400">Deep Work Sprint</span>
+            </div>
+            <button onclick="app.resetTimer()" class="text-[10px] text-slate-400 hover:text-slate-200 font-mono">
+              Reset
+            </button>
+          </div>
+
+          <div class="flex items-center justify-between gap-4">
+            <div>
+              <div id="timer-display" class="text-2xl font-mono font-bold tracking-wider">25:00</div>
+              <p class="text-[10px] text-slate-400">25 min single-task focus</p>
+            </div>
+
+            <button onclick="app.toggleTimer()" class="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors">
+              <i id="timer-icon" data-lucide="play" class="w-3.5 h-3.5"></i>
+              <span id="timer-btn-text">Start Focus</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ================= FEATURE 1 & 2: ACTIVITY HEATMAP & ENGINEERING RADAR ROW ================= -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-8">
+      
+      <!-- GitHub-Style Study Activity Heatmap -->
+      <div class="lg:col-span-2 glass-panel rounded-xl p-5 flex flex-col justify-between">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2">
+            <i data-lucide="calendar" class="w-4 h-4 text-emerald-500"></i>
+            <h3 class="text-xs font-mono uppercase tracking-wider font-semibold text-slate-300">Study Consistency Heatmap (Past 20 Weeks)</h3>
+          </div>
+          <span id="heatmap-total-count" class="text-xs font-mono text-slate-400">0 events logged</span>
+        </div>
+
+        <!-- Heatmap Grid -->
+        <div class="overflow-x-auto pb-2">
+          <div id="activity-heatmap-grid" class="flex gap-1">
+            <!-- Dynamically populated by app.js -->
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between pt-3 border-t border-inherit text-[10px] text-slate-400 font-mono mt-2">
+          <span>Sprint activity logs automatically on completing Pomodoros, topics, & notes</span>
+          <div class="flex items-center gap-1">
+            <span>Less</span>
+            <div class="w-2.5 h-2.5 rounded-sm heatmap-cell" data-level="0"></div>
+            <div class="w-2.5 h-2.5 rounded-sm heatmap-cell" data-level="1"></div>
+            <div class="w-2.5 h-2.5 rounded-sm heatmap-cell" data-level="2"></div>
+            <div class="w-2.5 h-2.5 rounded-sm heatmap-cell" data-level="3"></div>
+            <div class="w-2.5 h-2.5 rounded-sm heatmap-cell" data-level="4"></div>
+            <span>More</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feature 2: Engineering Radar Chart -->
+      <div class="glass-panel rounded-xl p-5 flex flex-col items-center justify-between">
+        <div class="w-full flex items-center justify-between mb-2">
+          <div class="flex items-center gap-2">
+            <i data-lucide="pie-chart" class="w-4 h-4 text-blue-400"></i>
+            <h3 class="text-xs font-mono uppercase tracking-wider font-semibold text-slate-300">Skills Balance</h3>
+          </div>
+          <span class="text-[10px] font-mono text-slate-400">6 Domains</span>
+        </div>
+
+        <div id="radar-chart-container" class="py-1">
+          <!-- Dynamically populated SVG radar by app.js -->
+        </div>
+
+        <div class="text-[10px] text-slate-400 font-mono text-center w-full pt-2 border-t border-inherit">
+          Levels balance as you advance tiers (C &rarr; A &rarr; M)
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ================= NAVIGATION TABS ================= -->
+    <div class="flex items-center gap-2 border-b border-inherit mb-6 overflow-x-auto pb-1">
+      <button class="nav-tab px-3.5 py-2.5 font-semibold text-xs sm:text-sm border-b-2 border-blue-500 text-blue-400 flex items-center gap-1.5 whitespace-nowrap transition-colors" data-tab="roadmap">
+        <i data-lucide="map" class="w-4 h-4"></i>
+        <span>Roadmap & Skills</span>
+      </button>
+
+      <button class="nav-tab px-3.5 py-2.5 font-semibold text-xs sm:text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 whitespace-nowrap transition-colors" data-tab="projects">
+        <i data-lucide="layers" class="w-4 h-4"></i>
+        <span>10 Real-World Systems Matrix</span>
+      </button>
+
+      <button class="nav-tab px-3.5 py-2.5 font-semibold text-xs sm:text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 whitespace-nowrap transition-colors" data-tab="methodology">
+        <i data-lucide="compass" class="w-4 h-4"></i>
+        <span>8-Step Study Method</span>
+      </button>
+
+      <button class="nav-tab px-3.5 py-2.5 font-semibold text-xs sm:text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 whitespace-nowrap transition-colors" data-tab="notes">
+        <i data-lucide="book-open" class="w-4 h-4"></i>
+        <span>My Study Notes</span>
+      </button>
+    </div>
+
+    <!-- ================= TAB CONTENT: ROADMAP ================= -->
+    <div id="tab-content-roadmap" class="tab-content">
+      
+      <!-- Search & Filters Toolbar -->
+      <div class="glass-panel rounded-xl p-3 mb-6 flex flex-col md:flex-row items-center justify-between gap-3">
+        
+        <!-- Live Search -->
+        <div class="relative w-full md:w-80">
+          <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+          <input 
+            type="text" 
+            id="search-input" 
+            placeholder="Search topics (e.g. SOLID, Kafka, SDLC)..." 
+            class="w-full pl-8 pr-3 py-1.5 rounded-lg text-xs placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors"
+            style="background: var(--bg-input); border: 1px solid var(--border-card);"
+          />
+        </div>
+
+        <!-- Filter Pills & Tier Legend -->
+        <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end overflow-x-auto pb-1 md:pb-0">
+          <!-- 3-Tier Legend -->
+          <div class="hidden sm:flex items-center gap-1 text-[10px] font-mono text-slate-400 mr-2">
+            <span>Tiers:</span>
+            <span class="px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/30">C: Concept</span>
+            <span class="px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/30">A: Applied</span>
+            <span class="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">M: Mastered</span>
+          </div>
+
+          <div class="flex items-center gap-1.5">
+            <button class="filter-btn px-2.5 py-1 rounded text-xs font-semibold bg-blue-600 text-white transition-colors" data-filter="all" onclick="app.setFilter('all')">
+              All
+            </button>
+            <button class="filter-btn px-2.5 py-1 rounded text-xs font-medium text-slate-400 hover:text-white transition-colors" data-filter="in_progress" onclick="app.setFilter('in_progress')">
+              In Progress
+            </button>
+            <button class="filter-btn px-2.5 py-1 rounded text-xs font-medium text-slate-400 hover:text-white transition-colors" data-filter="completed" onclick="app.setFilter('completed')">
+              Mastered
+            </button>
+            <button class="filter-btn px-2.5 py-1 rounded text-xs font-medium text-slate-400 hover:text-white transition-colors" data-filter="unstarted" onclick="app.setFilter('unstarted')">
+              Unstarted
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Phases Container (dynamically populated) -->
+      <div id="phases-container">
+        <!-- Rendered by app.js -->
+      </div>
+    </div>
+
+    <!-- ================= TAB CONTENT: 10 PROJECTS MATRIX ================= -->
+    <div id="tab-content-projects" class="tab-content hidden">
+      <div class="glass-panel rounded-xl p-5 mb-6">
+        <h3 class="text-lg font-bold mb-1">Project Portfolio — Interactive Systems Matrix</h3>
+        <p class="text-xs text-slate-400 font-arabic leading-relaxed max-w-4xl">
+          لن نعتمد على مشروع واحد طوال الخطة. كل نظام واقعي يربط مجموعة محددة من موضوعات الـ Roadmap. انقر على أي مهارة مطلوبة لفتح الـ Study Lab الخاص بها مباشرة.
+        </p>
+      </div>
+
+      <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Populated by app.js -->
+      </div>
+    </div>
+
+    <!-- ================= TAB CONTENT: METHODOLOGY ================= -->
+    <div id="tab-content-methodology" class="tab-content hidden">
+      
+      <!-- 8-Step Study Method -->
+      <div class="glass-panel rounded-xl p-5 mb-6">
+        <div class="flex items-center gap-2 mb-2">
+          <span class="px-2 py-0.5 rounded text-[11px] font-mono font-semibold" style="background: var(--badge-bg); color: var(--badge-text); border: 1px solid var(--border-card);">
+            How We Will Study
+          </span>
+          <span class="text-xs text-slate-400 font-arabic">طريقة العمل المتفق عليها لكل موضوع</span>
+        </div>
+        <h3 class="text-lg font-bold">The 8-Step Engineering Mastery Framework</h3>
+        <p class="text-xs text-slate-400 font-arabic mt-1 leading-relaxed">
+          الخطة مبنية على إتقان المفاهيم وليس إنهاء أسابيع محددة. لا ننتقل لموضوع جديد لمجرد انتهاء الوقت إذا كانت الأساسيات تحتاج تثبيتًا.
+        </p>
+
+        <div id="methodology-steps-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-5">
+          <!-- Populated by app.js -->
+        </div>
+      </div>
+
+      <!-- Learning Rules -->
+      <div class="glass-panel rounded-xl p-5 mb-6">
+        <h3 class="text-base font-bold mb-3 flex items-center gap-2">
+          <i data-lucide="shield-alert" class="w-4 h-4 text-amber-500"></i>
+          <span>قواعد التعلّم الصارمة (Learning Rules)</span>
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5 text-xs text-slate-300 font-arabic">
+          <div class="p-2.5 rounded-lg border border-inherit flex items-start gap-2" style="background: var(--bg-input)">
+            <span class="text-rose-400 font-bold">✕</span>
+            <span>لا نختبر موضوعًا لم يتم شرحه بعد من الصفر.</span>
+          </div>
+          <div class="p-2.5 rounded-lg border border-inherit flex items-start gap-2" style="background: var(--bg-input)">
+            <span class="text-rose-400 font-bold">✕</span>
+            <span>لا ننتقل لموضوع جديد لمجرد الالتزام بجدول زمني مجرد.</span>
+          </div>
+          <div class="p-2.5 rounded-lg border border-inherit flex items-start gap-2" style="background: var(--bg-input)">
+            <span class="text-blue-400 font-bold">✓</span>
+            <span>الصعوبة في أول مرة طبيعية؛ لا نلغي موضوعًا متقدمًا لمجرد أنه جديد.</span>
+          </div>
+          <div class="p-2.5 rounded-lg border border-inherit flex items-start gap-2" style="background: var(--bg-input)">
+            <span class="text-rose-400 font-bold">✕</span>
+            <span>لا نحفظ المصطلحات بمعزل عن المشكلات الهندسية التي تحلها.</span>
+          </div>
+          <div class="p-2.5 rounded-lg border border-inherit flex items-start gap-2" style="background: var(--bg-input)">
+            <span class="text-rose-400 font-bold">✕</span>
+            <span>لا نستخدم أدوات أو معماريات معقدة لمجرد أنها شائعة أو تريند.</span>
+          </div>
+          <div class="p-2.5 rounded-lg border border-inherit flex items-start gap-2" style="background: var(--bg-input)">
+            <span class="text-emerald-400 font-bold">✓</span>
+            <span>نركّز على الفهم والقدرة على شرح وتبرير القرار الهندسي وتنفيذه.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Relationship to Other Tracks -->
+      <div class="glass-panel rounded-xl p-5">
+        <h3 class="text-base font-bold mb-2">Relationship to Other Learning Tracks</h3>
+        <p class="text-xs text-slate-400 font-arabic mb-3">
+          هذه الخطة جزء من مسار تعلم أكبر يخدم التخصص لاحقًا في MLOps وAI Engineering:
+        </p>
+        <div id="methodology-tracks-container" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <!-- Populated by app.js -->
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ================= TAB CONTENT: MY NOTES ================= -->
+    <div id="tab-content-notes" class="tab-content hidden">
+      <div class="glass-panel rounded-xl p-5 mb-5 flex items-center justify-between">
+        <div>
+          <h3 class="text-lg font-bold mb-1">My Personal Study Notes</h3>
+          <p class="text-xs text-slate-400 font-arabic">
+            جميع الملاحظات والأفكار والأكواد التي سجلتها أثناء دراسة الموضوعات المختلفة محفوظة محلياً.
+          </p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="app.exportObsidianVault()" class="px-3 py-1.5 rounded-lg bg-purple-700 hover:bg-purple-600 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors font-mono">
+            <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+            <span>Export Obsidian Journal</span>
+          </button>
+          <button onclick="app.exportBackup()" class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors">
+            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+            <span>JSON Backup</span>
+          </button>
+        </div>
+      </div>
+
+      <div id="notes-summary-container">
+        <!-- Populated by app.js -->
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ================= SLIDE-OVER STUDY LAB DRAWER ================= -->
+  <div id="drawer-backdrop" class="fixed inset-0 drawer-backdrop pointer-events-none opacity-0 z-50 flex justify-end" onclick="app.closeDrawer()">
+    <div 
+      id="study-drawer" 
+      class="w-full max-w-xl h-full p-6 overflow-y-auto drawer-panel transform translate-x-full" 
+      onclick="event.stopPropagation()"
+    >
+      
+      <!-- Drawer Top Bar -->
+      <div class="flex items-center justify-between pb-3 border-b border-inherit">
+        <div class="flex items-center gap-2">
+          <span id="drawer-phase-badge" class="px-2 py-0.5 rounded text-[11px] font-mono font-semibold border">Phase</span>
+          <span id="drawer-topic-number" class="font-mono text-xs px-2 py-0.5 rounded" style="background: var(--badge-bg); color: var(--badge-text);">1.1</span>
+        </div>
+        <button onclick="app.closeDrawer()" class="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Topic Title & Arabic Translation -->
+      <div class="mt-4">
+        <h2 id="drawer-topic-title" class="text-xl font-bold tracking-tight"></h2>
+        <h3 id="drawer-topic-title-ar" class="text-sm text-slate-400 font-arabic mt-0.5"></h3>
+        <p id="drawer-topic-summary" class="text-xs text-slate-400 mt-2 leading-relaxed"></p>
+      </div>
+
+      <!-- Feature 3: Practiced in Projects Pill Tags Slot -->
+      <div id="drawer-related-projects">
+        <!-- Populated by app.js -->
+      </div>
+
+      <!-- Status Banner with 3-Tier Selector -->
+      <div id="drawer-status-banner" class="mt-4">
+        <!-- Populated by app.js -->
+      </div>
+
+      <!-- Sub-Points from Roadmap -->
+      <div class="mt-5">
+        <h4 class="text-xs font-mono uppercase tracking-wider text-slate-400 mb-2 flex items-center gap-1.5">
+          <i data-lucide="list" class="w-3.5 h-3.5 text-blue-400"></i>
+          <span>Roadmap Core Topics</span>
+        </h4>
+        <ul id="drawer-points-list" class="space-y-2 p-3.5 rounded-lg border border-inherit" style="background: var(--bg-input)">
+          <!-- Populated by app.js -->
+        </ul>
+      </div>
+
+      <!-- Feature 4: Self-Defense & Trade-Off Interview Questions -->
+      <div class="mt-5">
+        <h4 class="text-xs font-mono uppercase tracking-wider text-slate-400 mb-2 flex items-center gap-1.5">
+          <i data-lucide="help-circle" class="w-3.5 h-3.5 text-amber-400"></i>
+          <span>Architectural Trade-Off & Defense Questions</span>
+        </h4>
+        <div id="drawer-questions-list" class="space-y-2.5">
+          <!-- Populated by app.js -->
+        </div>
+      </div>
+
+      <!-- The 8 Study Steps Checklist -->
+      <div class="mt-5">
+        <h4 class="text-xs font-mono uppercase tracking-wider text-slate-400 mb-2 flex items-center gap-1.5">
+          <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-400"></i>
+          <span>8-Step Mastery Checklist (Click to complete)</span>
+        </h4>
+        <div id="drawer-study-steps" class="space-y-2">
+          <!-- Populated by app.js -->
+        </div>
+      </div>
+
+      <!-- Topic Study Notes -->
+      <div class="mt-5 pb-8">
+        <h4 class="text-xs font-mono uppercase tracking-wider text-slate-400 mb-1.5 flex items-center justify-between">
+          <span class="flex items-center gap-1.5">
+            <i data-lucide="edit-3" class="w-3.5 h-3.5 text-amber-500"></i>
+            <span>Personal Study Notes</span>
+          </span>
+          <span class="text-[10px] text-slate-500 font-normal lowercase font-mono">Auto-saved locally</span>
+        </h4>
+        <textarea 
+          id="drawer-notes-textarea" 
+          rows="5" 
+          placeholder="Write your personal reflections, key takeaways, diagrams, trade-off notes, or code examples here..."
+          class="w-full p-3 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors font-mono leading-relaxed"
+          style="background: var(--bg-input); border: 1px solid var(--border-card);"
+        ></textarea>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+
+</body>
+</html>
