@@ -1,119 +1,67 @@
 /* ==========================================================================
    Software Engineering Learning Platform Stylesheet
-   Authentic Engineering & Academic Themes (NO AI Gimmicks / No Neon Blurs)
+   Pure High-Contrast Light & Dark Themes (Crystal Clear Typography)
    ========================================================================== */
 
-/* 1. Theme: GitHub Engineering (Default - Crisp, authentic developer console) */
+/* 1. DARK THEME (Default) — Ultra High Contrast, Deep Slate */
 :root,
-body[data-theme="github"] {
-  --bg-primary: #0d1117;
-  --bg-secondary: #161b22;
-  --bg-card: #161b22;
-  --bg-card-hover: #1c2128;
-  --bg-input: #0d1117;
-  --border-card: #30363d;
-  --border-card-hover: #58a6ff;
-  --text-primary: #f0f6fc;
-  --text-secondary: #8b949e;
-  --text-muted: #6e7681;
-  --accent-primary: #2f81f7;
-  --accent-primary-hover: #388bfd;
-  --accent-success: #238636;
-  --accent-warning: #d29922;
-  --badge-bg: #21262d;
-  --badge-text: #58a6ff;
-  --accent-color: #2f81f7;
+body[data-theme="dark"] {
+  --bg-primary: #0b0f17;
+  --bg-secondary: #111723;
+  --bg-card: #151e2e;
+  --bg-card-hover: #1c273b;
+  --bg-input: #0f1522;
+  --border-card: #27354a;
+  --border-card-hover: #3b82f6;
 
-  /* Heatmap colors */
-  --heat-0: #161b22;
+  /* High-Contrast Typography */
+  --text-primary: #ffffff;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+
+  --accent-primary: #3b82f6;
+  --accent-primary-hover: #60a5fa;
+  --accent-success: #10b981;
+  --accent-warning: #f59e0b;
+  --badge-bg: #1e293b;
+  --badge-text: #60a5fa;
+
+  /* Heatmap */
+  --heat-0: #151e2e;
   --heat-1: #0e4429;
   --heat-2: #006d32;
   --heat-3: #26a641;
   --heat-4: #39d353;
 }
 
-/* 2. Theme: Warm Obsidian / Notion Craft (Cozy, bookish, editorial deep work) */
-body[data-theme="warm"] {
-  --bg-primary: #171514;
-  --bg-secondary: #211e1c;
-  --bg-card: #23201d;
-  --bg-card-hover: #2c2825;
-  --bg-input: #1a1715;
-  --border-card: #38332f;
-  --border-card-hover: #d97706;
-  --text-primary: #f7f4ee;
-  --text-secondary: #a8a29e;
-  --text-muted: #78716c;
-  --accent-primary: #d97706;
-  --accent-primary-hover: #b45309;
-  --accent-success: #15803d;
-  --accent-warning: #ea580c;
-  --badge-bg: #2d2824;
-  --badge-text: #fbbf24;
-  --accent-color: #d97706;
-
-  /* Heatmap colors */
-  --heat-0: #23201d;
-  --heat-1: #452b14;
-  --heat-2: #78350f;
-  --heat-3: #b45309;
-  --heat-4: #d97706;
-}
-
-/* 3. Theme: Minimalist Slate & Steel (Monochrome, high-focus engineering) */
-body[data-theme="slate"] {
-  --bg-primary: #0f1217;
-  --bg-secondary: #151921;
-  --bg-card: #181d26;
-  --bg-card-hover: #1e2430;
-  --bg-input: #0f1217;
-  --border-card: #252c38;
-  --border-card-hover: #38bdf8;
-  --text-primary: #f1f5f9;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
-  --accent-primary: #0284c7;
-  --accent-primary-hover: #0369a1;
-  --accent-success: #059669;
-  --accent-warning: #d97706;
-  --badge-bg: #1e2634;
-  --badge-text: #38bdf8;
-  --accent-color: #0284c7;
-
-  /* Heatmap colors */
-  --heat-0: #181d26;
-  --heat-1: #0c4a6e;
-  --heat-2: #0284c7;
-  --heat-3: #38bdf8;
-  --heat-4: #7dd3fc;
-}
-
-/* 4. Theme: Clean Paper / Notion Light (Daylight clarity, zero dark-mode AI vibes) */
+/* 2. LIGHT THEME — Crisp Daylight Paper, High Contrast Charcoal/Black */
 body[data-theme="light"] {
-  --bg-primary: #f9f9f8;
-  --bg-secondary: #f0f0ee;
+  --bg-primary: #f8fafc;
+  --bg-secondary: #f1f5f9;
   --bg-card: #ffffff;
-  --bg-card-hover: #fcfcfb;
-  --bg-input: #f4f4f2;
-  --border-card: #e3e3e0;
+  --bg-card-hover: #f8fafc;
+  --bg-input: #f1f5f9;
+  --border-card: #cbd5e1;
   --border-card-hover: #2563eb;
-  --text-primary: #191817;
-  --text-secondary: #63615e;
-  --text-muted: #8d8a86;
+
+  /* High-Contrast Typography */
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+
   --accent-primary: #2563eb;
   --accent-primary-hover: #1d4ed8;
-  --accent-success: #16a34a;
+  --accent-success: #059669;
   --accent-warning: #d97706;
-  --badge-bg: #eef2ff;
-  --badge-text: #2563eb;
-  --accent-color: #2563eb;
+  --badge-bg: #eff6ff;
+  --badge-text: #1d4ed8;
 
-  /* Heatmap colors */
-  --heat-0: #ebedf0;
-  --heat-1: #9be9a8;
-  --heat-2: #40c463;
-  --heat-3: #30a14e;
-  --heat-4: #216e39;
+  /* Heatmap */
+  --heat-0: #e2e8f0;
+  --heat-1: #86efac;
+  --heat-2: #4ade80;
+  --heat-3: #22c55e;
+  --heat-4: #15803d;
 }
 
 * {
@@ -126,12 +74,38 @@ body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
   overflow-x: hidden;
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-/* Clean Editorial Scrollbar */
+/* Base Headings & Text Color Fixes */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-primary);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+p, li {
+  color: var(--text-secondary);
+}
+
+/* Semantic Helper Classes */
+.text-title {
+  color: var(--text-primary) !important;
+}
+.text-body {
+  color: var(--text-secondary) !important;
+}
+.text-dim {
+  color: var(--text-muted) !important;
+}
+
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 7px;
   height: 7px;
@@ -147,7 +121,7 @@ body {
   background: var(--text-muted);
 }
 
-/* Crisp Engineering Card Style */
+/* Crisp Card Styling */
 .glass-panel {
   background-color: var(--bg-card);
   border: 1px solid var(--border-card);
@@ -158,7 +132,7 @@ body {
   border-color: var(--border-card-hover);
   background-color: var(--bg-card-hover);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
 }
 
 /* Floating XP Badge */
@@ -176,18 +150,19 @@ body {
   color: var(--accent-primary);
   background: var(--bg-card);
   border: 1px solid var(--border-card);
-  padding: 2px 8px;
+  padding: 3px 8px;
   border-radius: 6px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
   animation: xpFloat 0.9s forwards ease-out;
   z-index: 9999;
 }
 
-/* Developer Clean Checkbox */
+/* Checkbox */
 .cyber-checkbox {
   appearance: none;
-  width: 18px;
-  height: 18px;
-  border-radius: 4px;
+  width: 19px;
+  height: 19px;
+  border-radius: 5px;
   border: 1.5px solid var(--border-card);
   background: var(--bg-input);
   cursor: pointer;
@@ -211,7 +186,7 @@ body {
 .cyber-checkbox:checked::after {
   content: '✓';
   color: #ffffff;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 800;
   line-height: 1;
 }
@@ -219,8 +194,9 @@ body {
 /* 3-Tier Mastery Segmented Selector */
 .mastery-tier-btn {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
-  padding: 3px 6px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 7px;
   border-radius: 4px;
   border: 1px solid var(--border-card);
   background: var(--bg-input);
@@ -235,24 +211,30 @@ body {
 }
 
 .mastery-tier-btn.active-1 {
-  background: #f59e0b20;
-  border-color: #f59e0b80;
+  background: #f59e0b25;
+  border-color: #f59e0b;
+  color: #d97706;
+}
+body[data-theme="dark"] .mastery-tier-btn.active-1 {
   color: #fbbf24;
-  font-weight: 600;
 }
 
 .mastery-tier-btn.active-2 {
-  background: #2563eb20;
-  border-color: #2563eb80;
+  background: #2563eb25;
+  border-color: #2563eb;
+  color: #2563eb;
+}
+body[data-theme="dark"] .mastery-tier-btn.active-2 {
   color: #60a5fa;
-  font-weight: 600;
 }
 
 .mastery-tier-btn.active-3 {
-  background: #10b98120;
-  border-color: #10b98180;
+  background: #10b98125;
+  border-color: #10b981;
+  color: #059669;
+}
+body[data-theme="dark"] .mastery-tier-btn.active-3 {
   color: #34d399;
-  font-weight: 600;
 }
 
 /* Heatmap Grid */
@@ -261,7 +243,7 @@ body {
   height: 11px;
   border-radius: 2px;
   background-color: var(--heat-0);
-  border: 1px solid rgba(0,0,0,0.15);
+  border: 1px solid var(--border-card);
   transition: all 0.15s ease;
 }
 
@@ -277,24 +259,24 @@ body {
 
 /* Drawer / Modal Slide in */
 .drawer-backdrop {
-  background: rgba(0, 0, 0, 0.65);
+  background: rgba(0, 0, 0, 0.6);
   transition: opacity 0.25s ease;
 }
 
 .drawer-panel {
-  background-color: var(--bg-primary);
+  background-color: var(--bg-card);
   border-left: 1px solid var(--border-card);
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Clean Monospace Code Pill */
+/* Monospace Code Pill */
 .code-pill {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   background: var(--bg-input);
   border: 1px solid var(--border-card);
   color: var(--text-secondary);
-  padding: 0.2rem 0.5rem;
+  padding: 0.25rem 0.55rem;
   border-radius: 4px;
 }
 
@@ -305,14 +287,14 @@ body {
   fill: none;
 }
 .radar-polygon {
-  fill: rgba(37, 99, 235, 0.25);
+  fill: rgba(37, 99, 235, 0.2);
   stroke: var(--accent-primary);
   stroke-width: 2;
   transition: all 0.4s ease;
 }
 
-/* Arabic Typography */
+/* Arabic Typography Enhancements */
 .font-arabic {
   font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
-  line-height: 1.6;
+  line-height: 1.7;
 }

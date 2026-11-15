@@ -2,23 +2,25 @@
 
 class LearningPlatform {
   constructor() {
-    this.storageKey = "swe_roadmap_progress_v2";
-    this.statsKey = "swe_roadmap_stats_v2";
-    this.themeKey = "swe_roadmap_theme_v2";
+    this.storageKey = "swe_roadmap_progress_v3";
+    this.statsKey = "swe_roadmap_stats_v3";
+    this.themeKey = "swe_roadmap_theme_v3";
     this.currentFilter = "all";
     this.searchQuery = "";
     this.activeDrawerTopic = null;
     this.timerInterval = null;
-    this.timerTimeLeft = 25 * 60; // 25 min in seconds
+    this.timerTimeLeft = 25 * 60;
     this.isTimerRunning = false;
     this.activeTab = "roadmap";
 
-    // Load or initialize state
-    this.currentTheme = localStorage.getItem(this.themeKey) || "github";
+    // Load theme: strictly "dark" or "light"
+    const savedTheme = localStorage.getItem(this.themeKey);
+    this.currentTheme = (savedTheme === "light" || savedTheme === "dark") ? savedTheme : "dark";
+
     this.state = this.loadState();
     this.stats = this.loadStats();
 
-    // Audio Context
+    // Web Audio
     this.audioCtx = null;
 
     // Apply Theme
@@ -31,26 +33,34 @@ class LearningPlatform {
     this.setupEventListeners();
   }
 
-  // --- Theme Management ---
+  // --- Strict Light & Dark Theme Management ---
   applyTheme(theme) {
     this.currentTheme = theme;
     document.body.setAttribute("data-theme", theme);
     localStorage.setItem(this.themeKey, theme);
 
-    document.querySelectorAll(".theme-selector-btn").forEach(btn => {
-      const btnTheme = btn.getAttribute("data-theme-choice");
-      if (btnTheme === theme) {
-        btn.classList.add("ring-1", "ring-blue-500", "font-bold");
+    // Update Theme Toggle Button in Header
+    const toggleBtn = document.getElementById("theme-toggle-btn");
+    if (toggleBtn) {
+      if (theme === "dark") {
+        toggleBtn.innerHTML = `
+          <i data-lucide="sun" class="w-4 h-4 text-amber-400"></i>
+          <span class="text-xs font-medium text-title">Light Mode</span>
+        `;
       } else {
-        btn.classList.remove("ring-1", "ring-blue-500", "font-bold");
+        toggleBtn.innerHTML = `
+          <i data-lucide="moon" class="w-4 h-4 text-blue-600"></i>
+          <span class="text-xs font-medium text-title">Dark Mode</span>
+        `;
       }
-    });
+      if (window.lucide) lucide.createIcons();
+    }
   }
 
-  setTheme(theme) {
-    this.applyTheme(theme);
+  toggleTheme() {
+    const nextTheme = this.currentTheme === "dark" ? "light" : "dark";
+    this.applyTheme(nextTheme);
     this.renderAll();
-    this.playChime("success");
   }
 
   // --- Audio Synthesis ---
@@ -87,10 +97,10 @@ class LearningPlatform {
       osc1.type = "sine";
       osc2.type = "triangle";
 
-      osc1.frequency.setValueAtTime(523.25, now); // C5
-      osc1.frequency.exponentialRampToValueAtTime(659.25, now + 0.12); // E5
+      osc1.frequency.setValueAtTime(523.25, now);
+      osc1.frequency.exponentialRampToValueAtTime(659.25, now + 0.12);
       osc2.frequency.setValueAtTime(659.25, now);
-      osc2.frequency.exponentialRampToValueAtTime(783.99, now + 0.2); // G5
+      osc2.frequency.exponentialRampToValueAtTime(783.99, now + 0.2);
 
       gain.gain.setValueAtTime(0.12, now);
       gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
@@ -136,7 +146,7 @@ class LearningPlatform {
     }
   }
 
-  // --- State & LocalStorage Management ---
+  // --- State & LocalStorage ---
   loadState() {
     try {
       const saved = localStorage.getItem(this.storageKey);
@@ -151,7 +161,7 @@ class LearningPlatform {
         const isDefaultCompleted = ROADMAP_DATA.meta.initialCompleted.includes(t.id);
         initial[t.id] = {
           completed: isDefaultCompleted,
-          masteryLevel: isDefaultCompleted ? 3 : 0, // 0: None, 1: Concept, 2: Applied, 3: Mastered
+          masteryLevel: isDefaultCompleted ? 3 : 0,
           inProgress: t.id === ROADMAP_DATA.meta.currentTopicId,
           notes: "",
           completedSteps: isDefaultCompleted ? [1, 2, 3, 4, 5, 6, 7, 8] : [],
@@ -185,7 +195,7 @@ class LearningPlatform {
 
     const today = new Date().toISOString().split("T")[0];
     const initialLog = {};
-    initialLog[today] = 2; // initial completed items
+    initialLog[today] = 2;
 
     return {
       xp: 200,
@@ -245,7 +255,6 @@ class LearningPlatform {
     const oldLevel = item.masteryLevel || 0;
 
     if (oldLevel === level) {
-      // Toggle off to 0
       item.masteryLevel = 0;
       item.completed = false;
       this.stats.xp = Math.max(0, this.stats.xp - (level * 35));
@@ -433,7 +442,7 @@ class LearningPlatform {
           this.playChime("timer");
           this.triggerConfetti();
           this.stats.xp += 50;
-          this.logActivity(2); // Pomodoro adds 2 activity points to heatmap!
+          this.logActivity(2);
           this.saveState();
           this.renderAll();
           alert("Focus sprint completed! Take a 5-minute breather (+50 XP).");
@@ -468,14 +477,13 @@ class LearningPlatform {
     const container = document.getElementById("activity-heatmap-grid");
     if (!container) return;
 
-    const weeks = 20; // past 20 weeks
+    const weeks = 20;
     const today = new Date();
     const log = this.stats.activityLog || {};
 
     let html = "";
     let totalLogs = 0;
 
-    // Calculate start date (Sunday 20 weeks ago)
     const startDate = new Date(today);
     startDate.setDate(today.getDate() - (weeks * 7) + (6 - today.getDay()));
 
@@ -515,7 +523,7 @@ class LearningPlatform {
     container.innerHTML = html;
 
     const totalEl = document.getElementById("heatmap-total-count");
-    if (totalEl) totalEl.innerText = `${totalLogs} study events logged`;
+    if (totalEl) totalEl.innerText = `${totalLogs} events logged`;
   }
 
   // --- Feature 2: Radar Chart Generator ---
@@ -523,7 +531,6 @@ class LearningPlatform {
     const svgContainer = document.getElementById("radar-chart-container");
     if (!svgContainer) return;
 
-    // 6 Phase Axes
     const axes = [
       { name: "Foundations", phaseId: "phase_1" },
       { name: "Craft", phaseId: "phase_2" },
@@ -535,10 +542,9 @@ class LearningPlatform {
 
     const size = 200;
     const center = size / 2;
-    const radius = 70;
+    const radius = 68;
     const totalAxes = axes.length;
 
-    // Compute score per axis (average masteryLevel / 3)
     const scores = axes.map(axis => {
       const phase = ROADMAP_DATA.phases.find(p => p.id === axis.phaseId);
       if (!phase || phase.topics.length === 0) return 0.2;
@@ -547,10 +553,9 @@ class LearningPlatform {
         return acc + (item ? (item.masteryLevel || (item.completed ? 3 : 0)) : 0);
       }, 0);
       const maxPoints = phase.topics.length * 3;
-      return Math.max(0.15, totalPoints / maxPoints); // minimum 0.15 for visual baseline
+      return Math.max(0.15, totalPoints / maxPoints);
     });
 
-    // Build radar polygon points
     const points = scores.map((score, i) => {
       const angle = (Math.PI * 2 / totalAxes) * i - (Math.PI / 2);
       const r = radius * score;
@@ -559,14 +564,12 @@ class LearningPlatform {
       return `${x.toFixed(1)},${y.toFixed(1)}`;
     }).join(" ");
 
-    // Build concentric web circles
     let webHtml = "";
     [0.33, 0.66, 1].forEach(frac => {
       const r = radius * frac;
       webHtml += `<circle cx="${center}" cy="${center}" r="${r}" class="radar-grid" />`;
     });
 
-    // Build axis spoke lines & labels
     let spokesHtml = "";
     axes.forEach((axis, i) => {
       const angle = (Math.PI * 2 / totalAxes) * i - (Math.PI / 2);
@@ -576,7 +579,7 @@ class LearningPlatform {
       const yText = center + (radius + 16) * Math.sin(angle);
 
       spokesHtml += `<line x1="${center}" y1="${center}" x2="${xEnd}" y2="${yEnd}" class="radar-grid" />`;
-      spokesHtml += `<text x="${xText}" y="${yText}" fill="var(--text-muted)" font-size="8" font-family="JetBrains Mono" text-anchor="middle" dominant-baseline="middle">${axis.name}</text>`;
+      spokesHtml += `<text x="${xText}" y="${yText}" fill="var(--text-muted)" font-size="8.5" font-family="JetBrains Mono" font-weight="600" text-anchor="middle" dominant-baseline="middle">${axis.name}</text>`;
     });
 
     svgContainer.innerHTML = `
@@ -588,7 +591,7 @@ class LearningPlatform {
     `;
   }
 
-  // --- Feature 5: Export to Obsidian / Markdown Journal ---
+  // --- Feature 5: Export to Obsidian Journal ---
   exportObsidianVault() {
     const dateStr = new Date().toISOString().split("T")[0];
     let md = `---
@@ -660,7 +663,7 @@ tags:
     a.click();
     URL.revokeObjectURL(url);
     this.playChime("success");
-    alert("Obsidian Journal (.md) exported successfully! Ready to drop into your vault.");
+    alert("Obsidian Journal (.md) exported successfully!");
   }
 
   // --- Calculations for Progress ---
@@ -722,7 +725,7 @@ tags:
     if (soundBtn) {
       soundBtn.innerHTML = this.stats.soundEnabled
         ? `<i data-lucide="volume-2" class="w-4 h-4 text-emerald-500"></i>`
-        : `<i data-lucide="volume-x" class="w-4 h-4 text-slate-500"></i>`;
+        : `<i data-lucide="volume-x" class="w-4 h-4 text-dim"></i>`;
     }
   }
 
@@ -801,40 +804,41 @@ tags:
           <!-- Phase Header -->
           <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-inherit">
             <div class="flex items-start gap-4">
-              <div class="w-11 h-11 rounded-lg flex items-center justify-center font-bold text-base flex-shrink-0" style="background: ${phase.accent}15; color: ${phase.accent}; border: 1px solid ${phase.accent}40;">
+              <div class="w-11 h-11 rounded-lg flex items-center justify-center font-bold text-base flex-shrink-0" style="background: ${phase.accent}18; color: ${phase.accent}; border: 1px solid ${phase.accent}40;">
                 <i data-lucide="${phase.icon || 'folder'}" class="w-5 h-5"></i>
               </div>
               <div>
                 <div class="flex items-center gap-2 mb-1 flex-wrap">
-                  <span class="px-2 py-0.5 rounded text-[11px] font-semibold tracking-wide uppercase font-mono" style="background: ${phase.accent}15; color: ${phase.accent}; border: 1px solid ${phase.accent}30;">
+                  <span class="px-2 py-0.5 rounded text-[11px] font-semibold tracking-wide uppercase font-mono" style="background: ${phase.accent}18; color: ${phase.accent}; border: 1px solid ${phase.accent}30;">
                     ${phase.badge}
                   </span>
-                  <span class="text-xs text-slate-400 font-mono">${completedCount}/${totalCount} Completed (${phasePct}%)</span>
-                  ${isPhaseMastered ? '<span class="text-xs px-2 py-0.5 rounded bg-emerald-900/30 text-emerald-400 font-medium border border-emerald-700/50">Mastered</span>' : ''}
+                  <span class="text-xs text-dim font-mono">${completedCount}/${totalCount} Completed (${phasePct}%)</span>
+                  ${isPhaseMastered ? '<span class="text-xs px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold border border-emerald-500/30">Mastered</span>' : ''}
                 </div>
-                <h3 class="text-lg font-bold tracking-tight">${phase.title}</h3>
-                <p class="text-sm text-slate-400 font-arabic mt-0.5">${phase.titleAr}</p>
+                <h3 class="text-lg font-bold text-title tracking-tight">${phase.title}</h3>
+                <p class="text-sm text-dim font-arabic mt-0.5">${phase.titleAr}</p>
               </div>
             </div>
 
             <!-- Phase Progress Bar -->
             <div class="w-full md:w-52 flex flex-col gap-1.5">
-              <div class="flex justify-between text-xs text-slate-400 font-mono">
+              <div class="flex justify-between text-xs text-dim font-mono">
                 <span>Phase Progress</span>
-                <span class="font-bold">${phasePct}%</span>
+                <span class="font-bold text-title">${phasePct}%</span>
               </div>
-              <div class="w-full h-1.5 rounded-full bg-slate-800 overflow-hidden">
+              <div class="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
                 <div class="h-full rounded-full transition-all duration-300" style="width: ${phasePct}%; background: ${phase.accent}"></div>
               </div>
             </div>
           </div>
 
           <!-- Phase Goal Note -->
-          <div class="my-4 p-3 rounded-lg text-xs text-slate-300 font-arabic flex items-start gap-2.5" style="background: var(--bg-input); border: 1px solid var(--border-card);">
-            <i data-lucide="target" class="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5"></i>
+          <div class="my-4 p-3 rounded-lg text-xs font-arabic flex items-start gap-2.5" style="background: var(--bg-input); border: 1px solid var(--border-card);">
+            <i data-lucide="target" class="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5"></i>
             <div>
-              <span class="font-bold text-blue-400">الهدف والمخرج:</span> ${phase.goal} 
-              <span class="text-emerald-400 font-medium block mt-1">${phase.outcome}</span>
+              <span class="font-bold text-blue-600 dark:text-blue-400">الهدف والمخرج:</span> 
+              <span class="text-body">${phase.goal}</span>
+              <span class="text-emerald-600 dark:text-emerald-400 font-semibold block mt-1">${phase.outcome}</span>
             </div>
           </div>
 
@@ -850,21 +854,21 @@ tags:
               return `
                 <div class="glass-panel glass-panel-hover rounded-lg p-4 cursor-pointer flex flex-col justify-between ${
                   currentTier === 3 
-                    ? 'border-emerald-600/40' 
+                    ? 'border-emerald-500/50' 
                     : isCurrentMission 
-                    ? 'border-blue-500/70 ring-1 ring-blue-500/40' 
+                    ? 'border-blue-500 ring-1 ring-blue-500/40' 
                     : ''
                 }" onclick="app.openDrawer('${topic.id}')">
 
                   <div>
                     <div class="flex items-center justify-between gap-2 mb-2">
-                      <span class="font-mono text-xs px-2 py-0.5 rounded font-bold" style="background: var(--bg-input); color: var(--text-secondary); border: 1px solid var(--border-card);">${topic.number}</span>
+                      <span class="font-mono text-xs px-2 py-0.5 rounded font-bold" style="background: var(--bg-input); color: var(--text-muted); border: 1px solid var(--border-card);">${topic.number}</span>
 
                       <div class="flex items-center gap-1.5" onclick="event.stopPropagation()">
-                        ${isCurrentMission ? '<span class="text-[10px] px-1.5 py-0.5 rounded bg-blue-900/30 text-blue-300 border border-blue-500/40 font-mono font-semibold">Active</span>' : ''}
+                        ${isCurrentMission ? '<span class="text-[10px] px-1.5 py-0.5 rounded bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/30 font-mono font-semibold">Active</span>' : ''}
                         ${hasNotes ? '<i data-lucide="file-text" class="w-3.5 h-3.5 text-amber-500" title="Notes saved"></i>' : ''}
                         
-                        <!-- 3-Tier Mastery Selector -->
+                        <!-- 3-Tier Selector -->
                         <div class="flex items-center gap-0.5">
                           <button 
                             class="mastery-tier-btn ${currentTier >= 1 ? 'active-1' : ''}" 
@@ -885,23 +889,23 @@ tags:
                       </div>
                     </div>
 
-                    <h4 class="font-semibold text-sm line-clamp-1">
+                    <h4 class="font-bold text-sm text-title line-clamp-1">
                       ${topic.title}
                     </h4>
-                    <p class="text-xs text-slate-400 font-arabic mt-0.5 line-clamp-1">
+                    <p class="text-xs text-dim font-arabic mt-0.5 line-clamp-1">
                       ${topic.titleAr}
                     </p>
-                    <p class="text-xs text-slate-400 mt-2 line-clamp-2 leading-relaxed">
+                    <p class="text-xs text-body mt-2 line-clamp-2 leading-relaxed">
                       ${topic.summary}
                     </p>
                   </div>
 
-                  <div class="pt-3 mt-3 border-t border-inherit flex items-center justify-between text-[11px] text-slate-400">
+                  <div class="pt-3 mt-3 border-t border-inherit flex items-center justify-between text-[11px] text-dim">
                     <span class="flex items-center gap-1 font-mono">
-                      <i data-lucide="check-square" class="w-3.5 h-3.5 text-blue-400"></i>
+                      <i data-lucide="check-square" class="w-3.5 h-3.5 text-blue-500"></i>
                       <span>${completedStepsCount}/8 steps</span>
                     </span>
-                    <span class="hover:text-blue-400 flex items-center gap-0.5 transition-colors font-medium">
+                    <span class="hover:text-blue-500 flex items-center gap-0.5 transition-colors font-medium">
                       Study Lab &rarr;
                     </span>
                   </div>
@@ -916,9 +920,9 @@ tags:
     if (html === "") {
       html = `
         <div class="text-center py-16 glass-panel rounded-xl">
-          <i data-lucide="search-x" class="w-10 h-10 text-slate-400 mx-auto mb-3"></i>
-          <h3 class="text-base font-bold">No topics match your filter</h3>
-          <p class="text-xs text-slate-400 mt-1">Try resetting your search query or switching filters.</p>
+          <i data-lucide="search-x" class="w-10 h-10 text-dim mx-auto mb-3"></i>
+          <h3 class="text-base font-bold text-title">No topics match your filter</h3>
+          <p class="text-xs text-dim mt-1">Try resetting your search query or switching filters.</p>
           <button onclick="app.resetFilters()" class="mt-4 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold">
             Reset Filters
           </button>
@@ -946,16 +950,15 @@ tags:
     document.getElementById("drawer-topic-title-ar").innerText = topic.titleAr;
     document.getElementById("drawer-topic-summary").innerText = topic.summary;
 
-    // Status Banner with 3-Tier Selector
     const statusBanner = document.getElementById("drawer-status-banner");
     if (statusBanner) {
       statusBanner.innerHTML = `
         <div class="p-3.5 rounded-lg border border-inherit flex flex-col sm:flex-row sm:items-center justify-between gap-3" style="background: var(--bg-card)">
           <div>
-            <div class="text-[10px] uppercase font-mono text-slate-400">Current Mastery Level</div>
+            <div class="text-[10px] uppercase font-mono text-dim">Current Mastery Level</div>
             <div class="flex items-center gap-2 mt-1">
               <span class="text-xs font-bold font-mono ${
-                currentTier === 3 ? 'text-emerald-400' : currentTier === 2 ? 'text-blue-400' : currentTier === 1 ? 'text-amber-400' : 'text-slate-400'
+                currentTier === 3 ? 'text-emerald-500' : currentTier === 2 ? 'text-blue-500' : currentTier === 1 ? 'text-amber-500' : 'text-dim'
               }">
                 ${currentTier === 3 ? '🟢 Tier 3: Production Mastered' : currentTier === 2 ? '🔵 Tier 2: Built & Applied' : currentTier === 1 ? '🟡 Tier 1: Concept Understood' : '⚪ Unstarted'}
               </span>
@@ -966,24 +969,23 @@ tags:
             <button onclick="app.setMasteryLevel('${topic.id}', 1)" class="mastery-tier-btn px-2.5 py-1 ${currentTier >= 1 ? 'active-1' : ''}">1. Concept</button>
             <button onclick="app.setMasteryLevel('${topic.id}', 2)" class="mastery-tier-btn px-2.5 py-1 ${currentTier >= 2 ? 'active-2' : ''}">2. Applied</button>
             <button onclick="app.setMasteryLevel('${topic.id}', 3)" class="mastery-tier-btn px-2.5 py-1 ${currentTier === 3 ? 'active-3' : ''}">3. Mastered</button>
-            ${!isTarget ? `<button onclick="app.setAsCurrentMission('${topic.id}')" class="px-2 py-1 rounded bg-blue-900/30 text-blue-300 hover:bg-blue-900/50 border border-blue-500/40 text-[10px] font-semibold ml-2 font-mono">Set Target</button>` : ''}
+            ${!isTarget ? `<button onclick="app.setAsCurrentMission('${topic.id}')" class="px-2 py-1 rounded bg-blue-500/15 text-blue-600 dark:text-blue-400 hover:bg-blue-500/25 border border-blue-500/30 text-[10px] font-semibold ml-2 font-mono">Set Target</button>` : ''}
           </div>
         </div>
       `;
     }
 
-    // Feature 3: Practiced in Projects Pill Tags
     const matchingProjects = ROADMAP_DATA.projects.filter(p => p.requiredTopics && p.requiredTopics.includes(topic.id));
     const projectPillsContainer = document.getElementById("drawer-related-projects");
     if (projectPillsContainer) {
       if (matchingProjects.length > 0) {
         projectPillsContainer.innerHTML = `
           <div class="mt-4 p-3 rounded-lg border border-inherit text-xs" style="background: var(--bg-input)">
-            <span class="text-slate-400 text-[11px] block mb-1.5 font-mono uppercase">🏗️ Practiced in Real-World Systems:</span>
+            <span class="text-dim text-[11px] block mb-1.5 font-mono uppercase">🏗️ Practiced in Real-World Systems:</span>
             <div class="flex flex-wrap gap-1.5">
               ${matchingProjects.map(p => `
-                <span class="code-pill text-blue-300 flex items-center gap-1">
-                  <i data-lucide="${p.icon || 'layers'}" class="w-3 h-3"></i>
+                <span class="code-pill text-title flex items-center gap-1">
+                  <i data-lucide="${p.icon || 'layers'}" class="w-3 h-3 text-blue-500"></i>
                   ${p.domain}: ${p.system}
                 </span>
               `).join("")}
@@ -995,61 +997,58 @@ tags:
       }
     }
 
-    // Sub-Points from Roadmap
     const pointsList = document.getElementById("drawer-points-list");
     if (pointsList) {
       pointsList.innerHTML = topic.points.map(pt => `
-        <li class="flex items-start gap-2.5 text-xs text-slate-300 font-arabic leading-relaxed">
-          <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-blue-400 flex-shrink-0 mt-0.5"></i>
+        <li class="flex items-start gap-2.5 text-xs text-body font-arabic leading-relaxed">
+          <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-blue-500 flex-shrink-0 mt-0.5"></i>
           <span>${pt}</span>
         </li>
       `).join("");
     }
 
-    // Feature 4: Self-Defense & Trade-Off Interview Questions
     const questionsContainer = document.getElementById("drawer-questions-list");
     if (questionsContainer) {
       if (topic.questions && topic.questions.length > 0) {
         questionsContainer.innerHTML = topic.questions.map((q, idx) => `
           <div class="p-3.5 rounded-lg border border-inherit text-xs" style="background: var(--bg-input)">
-            <div class="font-semibold text-white mb-1.5 flex items-start gap-2">
-              <span class="text-blue-400 font-mono">Q${idx + 1}:</span>
+            <div class="font-bold text-title mb-1.5 flex items-start gap-2">
+              <span class="text-blue-500 font-mono">Q${idx + 1}:</span>
               <span>${q.q}</span>
             </div>
-            <div class="text-[11px] text-slate-400 italic mb-2">Hint: ${q.hint}</div>
+            <div class="text-[11px] text-dim italic mb-2">Hint: ${q.hint}</div>
             
             <details class="cursor-pointer group">
-              <summary class="text-[11px] font-mono text-blue-400 hover:text-blue-300 select-none">
+              <summary class="text-[11px] font-mono text-blue-600 dark:text-blue-400 hover:underline select-none">
                 [ Click to reveal architectural answer ]
               </summary>
-              <div class="mt-2 p-2.5 rounded bg-slate-900/60 border border-slate-700/60 text-slate-200 leading-relaxed text-[11px]">
+              <div class="mt-2 p-2.5 rounded border border-inherit text-body leading-relaxed text-[11px]" style="background: var(--bg-card)">
                 ${q.answer}
               </div>
             </details>
           </div>
         `).join("");
       } else {
-        questionsContainer.innerHTML = `<p class="text-xs text-slate-500 italic">No specific defense questions assigned for this topic yet.</p>`;
+        questionsContainer.innerHTML = `<p class="text-xs text-dim italic">No specific defense questions assigned for this topic yet.</p>`;
       }
     }
 
-    // 8-Step Framework
     const stepsContainer = document.getElementById("drawer-study-steps");
     if (stepsContainer) {
       stepsContainer.innerHTML = ROADMAP_DATA.studySteps.map(step => {
         const isChecked = topicState.completedSteps && topicState.completedSteps.includes(step.num);
         return `
           <div class="p-3 rounded-lg border transition-all cursor-pointer ${
-            isChecked ? 'border-blue-500/40 bg-blue-950/20' : 'border-inherit hover:border-slate-600'
+            isChecked ? 'border-blue-500/50 bg-blue-500/10' : 'border-inherit hover:border-slate-400 dark:hover:border-slate-600'
           }" style="background: var(--bg-input)" onclick="app.toggleDrawerStudyStep(${step.num})">
             <div class="flex items-start gap-3">
               <input type="checkbox" class="cyber-checkbox mt-0.5" ${isChecked ? 'checked' : ''} onclick="event.stopPropagation(); app.toggleDrawerStudyStep(${step.num})" />
               <div class="flex-1">
                 <div class="flex items-center justify-between">
-                  <span class="text-xs font-bold ${isChecked ? 'text-blue-400' : ''}">Step ${step.num}: ${step.title}</span>
-                  <span class="text-[11px] text-slate-400 font-arabic">${step.ar}</span>
+                  <span class="text-xs font-bold ${isChecked ? 'text-blue-600 dark:text-blue-400' : 'text-title'}">Step ${step.num}: ${step.title}</span>
+                  <span class="text-[11px] text-dim font-arabic">${step.ar}</span>
                 </div>
-                <p class="text-[11px] text-slate-400 mt-1 font-arabic leading-normal">${step.desc}</p>
+                <p class="text-[11px] text-body mt-1 font-arabic leading-normal">${step.desc}</p>
               </div>
             </div>
           </div>
@@ -1057,7 +1056,6 @@ tags:
       }).join("");
     }
 
-    // Notes Textarea
     const notesBox = document.getElementById("drawer-notes-textarea");
     if (notesBox) {
       notesBox.value = topicState.notes || "";
@@ -1067,7 +1065,7 @@ tags:
     if (window.lucide) lucide.createIcons();
   }
 
-  // --- Feature 3: Interactive System-to-Skill Matrix in Projects Tab ---
+  // --- Feature 3: Matrix in Projects Tab ---
   renderProjectsTab() {
     const container = document.getElementById("projects-grid");
     if (!container) return;
@@ -1079,31 +1077,29 @@ tags:
             <span class="px-2 py-0.5 rounded text-xs font-semibold font-mono" style="background: var(--badge-bg); color: var(--badge-text); border: 1px solid var(--border-card);">
               ${proj.domain}
             </span>
-            <span class="text-xs font-mono text-slate-400">Project #${idx + 1}</span>
+            <span class="text-xs font-mono text-dim">Project #${idx + 1}</span>
           </div>
 
-          <h4 class="text-base font-bold mb-1">${proj.system}</h4>
-          <p class="text-xs text-slate-400 font-arabic mb-3">${proj.systemAr}</p>
-          <p class="text-xs text-slate-300 font-arabic leading-relaxed mb-4">${proj.description}</p>
+          <h4 class="text-base font-bold text-title mb-1">${proj.system}</h4>
+          <p class="text-xs text-dim font-arabic mb-3">${proj.systemAr}</p>
+          <p class="text-xs text-body font-arabic leading-relaxed mb-4">${proj.description}</p>
         </div>
 
         <div>
-          <!-- Required Roadmap Topics Pill Links -->
           <div class="mb-3">
-            <div class="text-[10px] uppercase tracking-wider font-semibold text-slate-400 mb-1.5 font-mono">Required Roadmap Skills:</div>
+            <div class="text-[10px] uppercase tracking-wider font-semibold text-dim mb-1.5 font-mono">Required Roadmap Skills:</div>
             <div class="flex flex-wrap gap-1.5">
               ${(proj.requiredTopics || []).map(topicId => {
                 let topicLabel = topicId;
-                let topicObj = null;
                 for (const ph of ROADMAP_DATA.phases) {
                   const f = ph.topics.find(t => t.id === topicId);
-                  if (f) { topicLabel = `${f.number} ${f.title}`; topicObj = f; break; }
+                  if (f) { topicLabel = `${f.number} ${f.title}`; break; }
                 }
                 const isMastered = this.state[topicId] && (this.state[topicId].completed || this.state[topicId].masteryLevel === 3);
                 return `
                   <button 
                     onclick="app.openDrawer('${topicId}')" 
-                    class="code-pill hover:border-blue-500 cursor-pointer transition-colors flex items-center gap-1 ${isMastered ? 'text-emerald-400 border-emerald-700/50' : 'text-blue-400'}"
+                    class="code-pill hover:border-blue-500 cursor-pointer transition-colors flex items-center gap-1 ${isMastered ? 'text-emerald-600 dark:text-emerald-400 border-emerald-500/40' : 'text-blue-600 dark:text-blue-400'}"
                     title="Open ${topicLabel}"
                   >
                     ${isMastered ? '✓' : '○'} ${topicLabel}
@@ -1113,7 +1109,7 @@ tags:
             </div>
           </div>
 
-          <div class="text-[10px] uppercase tracking-wider font-semibold text-slate-400 mb-1.5 font-mono">Challenges:</div>
+          <div class="text-[10px] uppercase tracking-wider font-semibold text-dim mb-1.5 font-mono">Challenges:</div>
           <div class="flex flex-wrap gap-1.5">
             ${proj.challenges.map(c => `<span class="code-pill">${c}</span>`).join("")}
           </div>
@@ -1132,11 +1128,11 @@ tags:
               ${step.num}
             </div>
             <div>
-              <h4 class="font-bold text-sm">${step.title}</h4>
-              <p class="text-xs text-slate-400 font-arabic">${step.ar}</p>
+              <h4 class="font-bold text-sm text-title">${step.title}</h4>
+              <p class="text-xs text-dim font-arabic">${step.ar}</p>
             </div>
           </div>
-          <p class="text-xs text-slate-300 font-arabic leading-relaxed">${step.desc}</p>
+          <p class="text-xs text-body font-arabic leading-relaxed">${step.desc}</p>
         </div>
       `).join("");
     }
@@ -1146,10 +1142,10 @@ tags:
       tracksContainer.innerHTML = ROADMAP_DATA.learningTracks.map(trk => `
         <div class="p-4 rounded-xl glass-panel">
           <div class="flex items-center justify-between mb-2">
-            <h4 class="font-bold text-sm">${trk.track}</h4>
+            <h4 class="font-bold text-sm text-title">${trk.track}</h4>
             <span class="text-[11px] px-2 py-0.5 rounded font-mono ${trk.color}">${trk.status}</span>
           </div>
-          <p class="text-xs text-slate-300 font-arabic leading-relaxed">${trk.role}</p>
+          <p class="text-xs text-body font-arabic leading-relaxed">${trk.role}</p>
         </div>
       `).join("");
     }
@@ -1171,9 +1167,9 @@ tags:
     if (topicsWithNotes.length === 0) {
       container.innerHTML = `
         <div class="text-center py-16 glass-panel rounded-xl">
-          <i data-lucide="book-open" class="w-10 h-10 text-slate-400 mx-auto mb-3"></i>
-          <h3 class="text-base font-bold">No Study Notes Yet</h3>
-          <p class="text-xs text-slate-400 mt-1">Open any topic from the roadmap to write your thoughts, insights, and code snippets!</p>
+          <i data-lucide="book-open" class="w-10 h-10 text-dim mx-auto mb-3"></i>
+          <h3 class="text-base font-bold text-title">No Study Notes Yet</h3>
+          <p class="text-xs text-dim mt-1">Open any topic from the roadmap to write your thoughts, insights, and code snippets!</p>
         </div>
       `;
     } else {
@@ -1182,11 +1178,11 @@ tags:
           <div class="flex items-center justify-between mb-2">
             <div class="flex items-center gap-2">
               <span class="font-mono text-xs px-2 py-0.5 rounded" style="background: var(--badge-bg); color: var(--badge-text); border: 1px solid var(--border-card);">${item.number}</span>
-              <h4 class="font-bold text-sm">${item.title}</h4>
+              <h4 class="font-bold text-sm text-title">${item.title}</h4>
             </div>
-            <button onclick="app.openDrawer('${item.id}')" class="text-xs text-blue-400 hover:underline">Edit Notes &rarr;</button>
+            <button onclick="app.openDrawer('${item.id}')" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">Edit Notes &rarr;</button>
           </div>
-          <div class="p-3 rounded-lg text-xs font-mono whitespace-pre-wrap leading-relaxed" style="background: var(--bg-input); border: 1px solid var(--border-card);">
+          <div class="p-3 rounded-lg text-xs font-mono text-body whitespace-pre-wrap leading-relaxed" style="background: var(--bg-input); border: 1px solid var(--border-card);">
             ${this.escapeHtml(item.notes)}
           </div>
         </div>
@@ -1204,10 +1200,10 @@ tags:
     document.querySelectorAll(".filter-btn").forEach(btn => {
       if (btn.getAttribute("data-filter") === filterName) {
         btn.classList.add("bg-blue-600", "text-white");
-        btn.classList.remove("text-slate-400");
+        btn.classList.remove("text-dim");
       } else {
         btn.classList.remove("bg-blue-600", "text-white");
-        btn.classList.add("text-slate-400");
+        btn.classList.add("text-dim");
       }
     });
     this.renderRoadmap();
@@ -1225,7 +1221,7 @@ tags:
   // --- Backup Export / Import ---
   exportBackup() {
     const data = {
-      version: 2,
+      version: 3,
       exportDate: new Date().toISOString(),
       stats: this.stats,
       state: this.state
@@ -1275,7 +1271,7 @@ tags:
     }
   }
 
-  // --- Event Listeners Wiring ---
+  // --- Event Listeners ---
   setupEventListeners() {
     const searchInput = document.getElementById("search-input");
     if (searchInput) {
@@ -1303,11 +1299,11 @@ tags:
         this.activeTab = target;
 
         document.querySelectorAll(".nav-tab").forEach(t => {
-          t.classList.remove("border-blue-500", "text-blue-400", "font-bold");
-          t.classList.add("border-transparent", "text-slate-400");
+          t.classList.remove("border-blue-500", "text-blue-500", "font-bold");
+          t.classList.add("border-transparent", "text-dim");
         });
-        tab.classList.add("border-blue-500", "text-blue-400", "font-bold");
-        tab.classList.remove("border-transparent", "text-slate-400");
+        tab.classList.add("border-blue-500", "text-blue-500", "font-bold");
+        tab.classList.remove("border-transparent", "text-dim");
 
         document.querySelectorAll(".tab-content").forEach(c => c.classList.add("hidden"));
         const targetContent = document.getElementById(`tab-content-${target}`);
